@@ -1,56 +1,34 @@
-import * as THREE from 'three'
-import { useFrame, extend } from '@react-three/fiber'
-import { useRef, useState } from 'react'
-import useStore from '@/helpers/store'
-import { shaderMaterial } from '@react-three/drei'
+import { useRef, Suspense } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { Stars } from '@react-three/drei'
+import { Sphere, useTexture } from '@react-three/drei'
+import { LayerMaterial, Base, Depth, Fresnel, Texture, Noise } from 'lamina'
 
-import vertex from './glsl/shader.vert'
-import fragment from './glsl/shader.frag'
-
-const ColorShiftMaterial = shaderMaterial(
-  {
-    time: 0,
-    color: new THREE.Color(0.05, 0.0, 0.025),
-  },
-  vertex,
-  fragment
-)
-
-// This is the 🔑 that HMR will renew if this file is edited
-// It works for THREE.ShaderMaterial as well as for drei/shaderMaterial
-// @ts-ignore
-ColorShiftMaterial.key = THREE.MathUtils.generateUUID()
-
-extend({ ColorShiftMaterial })
-
-const Shader = (props) => {
-  const meshRef = useRef(null)
-  const [hovered, setHover] = useState(false)
-  const router = useStore((state) => state.router)
-
-  useFrame((state, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = meshRef.current.rotation.y += 0.01
-    }
-    if (meshRef.current.material) {
-      meshRef.current.material.uniforms.time.value +=
-        Math.sin(delta / 2) * Math.cos(delta / 2)
-    }
+export default function Shader() {
+  const targetRef = useRef()
+  const texture = useTexture(['/img/clouds.png', '/img/volcanic.png'])
+  useFrame(({ clock }) => {
+    targetRef.current.rotation.x = Math.sin(clock.getElapsedTime())
+    targetRef.current.rotation.y = clock.getElapsedTime()
+    targetRef.current.rotation.x / 0.1
+    targetRef.current.rotation.y / 0.1
   })
 
   return (
-    <mesh
-      ref={meshRef}
-      scale={hovered ? 1.1 : 1}
-      onPointerOver={(e) => setHover(true)}
-      onPointerOut={(e) => setHover(false)}
-      {...props}
-    >
-      <boxBufferGeometry args={[1, 1, 1]} />
-      {/* @ts-ignore */}
-      <colorShiftMaterial key={ColorShiftMaterial.key} time={3} />
-    </mesh>
+    <>
+      <Suspense fallback={null}>
+        <Stars />
+        <Sphere ref={targetRef}>
+          <ambientLight intensity={1} />
+          <pointLight position={[100, 100, 100]} />
+          <LayerMaterial>
+            <Base color='#D33CE7' valpha={1} mode='normal' />
+            <Noise colorA='#5B2CCB' colorB='#000000' alpha={1} mode='lighten' />
+            <Texture map={texture[0]} alpha={0.75} />
+            <Texture map={texture[1]} alpha={0.5} />
+          </LayerMaterial>
+        </Sphere>
+      </Suspense>
+    </>
   )
 }
-
-export default Shader
