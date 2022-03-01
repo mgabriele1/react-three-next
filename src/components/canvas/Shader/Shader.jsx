@@ -8,16 +8,13 @@ export default function Shader() {
   const targetRef = useRef()
   const texture = useTexture(['/img/clouds.png', '/img/volcanic.png'])
   useFrame(({ clock }) => {
-    targetRef.current.rotation.x = Math.sin(clock.getElapsedTime())
-    targetRef.current.rotation.y = clock.getElapsedTime()
-    targetRef.current.rotation.x / 0.1
-    targetRef.current.rotation.y / 0.1
+    targetRef.current.rotation.y = (clock.getElapsedTime())/1.6
   })
 
   return (
     <>
       <Suspense fallback={null}>
-        <Stars />
+        <Stars/>
         <Sphere ref={targetRef}>
           <ambientLight intensity={1} />
           <pointLight position={[100, 100, 100]} />

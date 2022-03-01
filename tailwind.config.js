@@ -18,6 +18,10 @@ module.exports = {
       'krona': "'Krona One'",
       'space': "'Space Grotesk'",
     },
+    minHeight: {
+      '105': '105px',
+      '125': '125px',
+    },
     extend: {},
   },
   variants: {
